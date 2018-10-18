@@ -116,7 +116,7 @@ public class ServiceRunner {
   private static Microservice<ChequeManager> chequeManager;
   private static Microservice<PayrollManager> payrollManager;
   private static Microservice<GroupManager> groupManager;
-  private static Microservice<DatamigrationManager> datamigrationManager;
+ // private static Microservice<DatamigrationManager> datamigrationManager;
 
 
 
@@ -249,8 +249,8 @@ public class ServiceRunner {
     ServiceRunner.groupManager = new Microservice<>(GroupManager.class, "group", "0.1.0-BUILD-SNAPSHOT", ServiceRunner.INTEGRATION_TEST_ENVIRONMENT);
     startService(generalProperties, ServiceRunner.groupManager);
 
-    ServiceRunner.datamigrationManager = new Microservice<>(DatamigrationManager.class, "datamigration", "0.1.0-BUILD-SNAPSHOT", ServiceRunner.INTEGRATION_TEST_ENVIRONMENT);
-    startService(generalProperties, datamigrationManager);
+    /*ServiceRunner.datamigrationManager = new Microservice<>(DatamigrationManager.class, "datamigration", "0.1.0-BUILD-SNAPSHOT", ServiceRunner.INTEGRATION_TEST_ENVIRONMENT);
+    startService(generalProperties, datamigrationManager);*/
   }
 
   @After
@@ -267,7 +267,7 @@ public class ServiceRunner {
     ServiceRunner.customerManager.kill();
     ServiceRunner.organizationManager.kill();
     ServiceRunner.identityManager.kill();
-    ServiceRunner.datamigrationManager.kill();
+    //ServiceRunner.datamigrationManager.kill();
 
     if (!isPersistent) {
       ServiceRunner.embeddedMariaDb.stop();
@@ -299,7 +299,7 @@ public class ServiceRunner {
     System.out.println("Cheque Service: " + ServiceRunner.chequeManager.getProcessEnvironment().serverURI());
     System.out.println("Payroll Service: " + ServiceRunner.payrollManager.getProcessEnvironment().serverURI());
     System.out.println("Group Service: " + ServiceRunner.groupManager.getProcessEnvironment().serverURI());
-    System.out.println("Data Migration Service: " + ServiceRunner.datamigrationManager.getProcessEnvironment().serverURI());
+    //System.out.println("Data Migration Service: " + ServiceRunner.datamigrationManager.getProcessEnvironment().serverURI());
 
     boolean run = true;
 
@@ -363,8 +363,8 @@ public class ServiceRunner {
         ApplicationBuilder.create(ServiceRunner.reportManager.name(), ServiceRunner.reportManager.uri()),
         ApplicationBuilder.create(ServiceRunner.chequeManager.name(), ServiceRunner.chequeManager.uri()),
         ApplicationBuilder.create(ServiceRunner.payrollManager.name(), ServiceRunner.payrollManager.uri()),
-        ApplicationBuilder.create(ServiceRunner.groupManager.name(), ServiceRunner.groupManager.uri()),
-        ApplicationBuilder.create(ServiceRunner.datamigrationManager.name(), ServiceRunner.datamigrationManager.uri())
+        ApplicationBuilder.create(ServiceRunner.groupManager.name(), ServiceRunner.groupManager.uri())
+        //ApplicationBuilder.create(ServiceRunner.datamigrationManager.name(), ServiceRunner.datamigrationManager.uri())
     );
 
 
@@ -470,7 +470,7 @@ public class ServiceRunner {
 
       provisionApp(tenant, ServiceRunner.groupManager, org.apache.fineract.cn.group.api.v1.EventConstants.INITIALIZE);
 
-      provisionApp(tenant, ServiceRunner.datamigrationManager, DatamigrationEventConstants.INITIALIZE);
+    //  provisionApp(tenant, ServiceRunner.datamigrationManager, DatamigrationEventConstants.INITIALIZE);
 
       final UserWithPassword orgAdminUserPassword = createOrgAdminRoleAndUser(tenantAdminPassword.getAdminPassword());
 
