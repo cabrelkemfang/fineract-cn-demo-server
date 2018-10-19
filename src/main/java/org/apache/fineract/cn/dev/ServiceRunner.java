@@ -116,9 +116,7 @@ public class ServiceRunner {
   private static Microservice<ChequeManager> chequeManager;
   private static Microservice<PayrollManager> payrollManager;
   private static Microservice<GroupManager> groupManager;
- // private static Microservice<DatamigrationManager> datamigrationManager;
-
-
+  private static Microservice<DatamigrationManager> datamigrationManager;
 
 
   private static DB embeddedMariaDb;
@@ -174,8 +172,7 @@ public class ServiceRunner {
   }
 
   @Before
-  public void before() throws Exception
-  {
+  public void before() throws Exception {
     this.isPersistent = this.environment.containsProperty("demoserver.persistent");
     this.shouldProvision = this.environment.containsProperty("demoserver.provision");
 
@@ -184,9 +181,9 @@ public class ServiceRunner {
       EmbeddedCassandraServerHelper.startEmbeddedCassandra(TimeUnit.SECONDS.toMillis(30L));
       // start embedded MariaDB
       ServiceRunner.embeddedMariaDb = DB.newEmbeddedDB(
-          DBConfigurationBuilder.newBuilder()
-              .setPort(3306)
-              .build()
+              DBConfigurationBuilder.newBuilder()
+                      .setPort(3306)
+                      .build()
       );
       ServiceRunner.embeddedMariaDb.start();
     }
@@ -206,13 +203,15 @@ public class ServiceRunner {
 
     ServiceRunner.identityManager = new Microservice<>(IdentityManager.class, "identity", "0.1.0-BUILD-SNAPSHOT", ServiceRunner.INTEGRATION_TEST_ENVIRONMENT)
             .addProperties(new ExtraProperties() {{
-              setProperty("identity.token.refresh.secureCookie", "false");}});
+              setProperty("identity.token.refresh.secureCookie", "false");
+            }});
     startService(generalProperties, identityManager);
 
     ServiceRunner.rhythmManager = new Microservice<>(RhythmManager.class, "rhythm", "0.1.0-BUILD-SNAPSHOT", ServiceRunner.INTEGRATION_TEST_ENVIRONMENT)
             .addProperties(new ExtraProperties() {{
               setProperty("rhythm.beatCheckRate", Long.toString(TimeUnit.MINUTES.toMillis(10)));
-              setProperty("rhythm.user", SCHEDULER_USER_NAME);}});
+              setProperty("rhythm.user", SCHEDULER_USER_NAME);
+            }});
     startService(generalProperties, rhythmManager);
 
     ServiceRunner.organizationManager = new Microservice<>(OrganizationManager.class, "office", "0.1.0-BUILD-SNAPSHOT", ServiceRunner.INTEGRATION_TEST_ENVIRONMENT);
@@ -222,7 +221,7 @@ public class ServiceRunner {
     startService(generalProperties, customerManager);
 
     ServiceRunner.ledgerManager = new Microservice<>(LedgerManager.class, "accounting", "0.1.0-BUILD-SNAPSHOT",
-          ServiceRunner.INTEGRATION_TEST_ENVIRONMENT);
+            ServiceRunner.INTEGRATION_TEST_ENVIRONMENT);
     startService(generalProperties, ledgerManager);
 
     ServiceRunner.portfolioManager = new Microservice<>(PortfolioManager.class, "portfolio", "0.1.0-BUILD-SNAPSHOT", ServiceRunner.INTEGRATION_TEST_ENVIRONMENT)
@@ -249,8 +248,8 @@ public class ServiceRunner {
     ServiceRunner.groupManager = new Microservice<>(GroupManager.class, "group", "0.1.0-BUILD-SNAPSHOT", ServiceRunner.INTEGRATION_TEST_ENVIRONMENT);
     startService(generalProperties, ServiceRunner.groupManager);
 
-    /*ServiceRunner.datamigrationManager = new Microservice<>(DatamigrationManager.class, "datamigration", "0.1.0-BUILD-SNAPSHOT", ServiceRunner.INTEGRATION_TEST_ENVIRONMENT);
-    startService(generalProperties, datamigrationManager);*/
+    ServiceRunner.datamigrationManager = new Microservice<>(DatamigrationManager.class, "datamigration", "0.1.0-BUILD-SNAPSHOT", ServiceRunner.INTEGRATION_TEST_ENVIRONMENT);
+    startService(generalProperties, datamigrationManager);
   }
 
   @After
@@ -267,7 +266,7 @@ public class ServiceRunner {
     ServiceRunner.customerManager.kill();
     ServiceRunner.organizationManager.kill();
     ServiceRunner.identityManager.kill();
-    //ServiceRunner.datamigrationManager.kill();
+    ServiceRunner.datamigrationManager.kill();
 
     if (!isPersistent) {
       ServiceRunner.embeddedMariaDb.stop();
@@ -283,9 +282,8 @@ public class ServiceRunner {
       } else {
         this.migrateServices();
       }
-    }
-    finally {
-     // ServiceRunner.provisionerService.kill();
+    } finally {
+      // ServiceRunner.provisionerService.kill();
     }
     System.out.println("Provisioner Service: " + ServiceRunner.provisionerService.getProcessEnvironment().serverURI());
     System.out.println("Identity Service: " + ServiceRunner.identityManager.getProcessEnvironment().serverURI());
@@ -325,7 +323,7 @@ public class ServiceRunner {
 
   private void migrateServices() {
     final AuthenticationResponse authenticationResponse =
-        ServiceRunner.provisionerService.api().authenticate(ServiceRunner.CLIENT_ID, ApiConstants.SYSTEM_SU, "oS/0IiAME/2unkN1momDrhAdNKOhGykYFH/mJN20");
+            ServiceRunner.provisionerService.api().authenticate(ServiceRunner.CLIENT_ID, ApiConstants.SYSTEM_SU, "oS/0IiAME/2unkN1momDrhAdNKOhGykYFH/mJN20");
 
     try (final AutoSeshat ignored = new AutoSeshat(authenticationResponse.getToken())) {
       final List<Tenant> tenants = ServiceRunner.provisionerService.api().getTenants();
@@ -349,22 +347,22 @@ public class ServiceRunner {
 
   private void provisionAppsViaSeshat() throws InterruptedException, IOException {
     final AuthenticationResponse authenticationResponse =
-        ServiceRunner.provisionerService.api().authenticate(ServiceRunner.CLIENT_ID, ApiConstants.SYSTEM_SU, "oS/0IiAME/2unkN1momDrhAdNKOhGykYFH/mJN20");
+            ServiceRunner.provisionerService.api().authenticate(ServiceRunner.CLIENT_ID, ApiConstants.SYSTEM_SU, "oS/0IiAME/2unkN1momDrhAdNKOhGykYFH/mJN20");
 
     final List<Application> applicationsToCreate = Arrays.asList(
-        ApplicationBuilder.create(ServiceRunner.identityManager.name(), ServiceRunner.identityManager.uri()),
-        ApplicationBuilder.create(ServiceRunner.rhythmManager.name(), ServiceRunner.rhythmManager.uri()),
-        ApplicationBuilder.create(ServiceRunner.organizationManager.name(), ServiceRunner.organizationManager.uri()),
-        ApplicationBuilder.create(ServiceRunner.customerManager.name(), ServiceRunner.customerManager.uri()),
-        ApplicationBuilder.create(ServiceRunner.ledgerManager.name(), ServiceRunner.ledgerManager.uri()),
-        ApplicationBuilder.create(ServiceRunner.portfolioManager.name(), ServiceRunner.portfolioManager.uri()),
-        ApplicationBuilder.create(ServiceRunner.depositAccountManager.name(), ServiceRunner.depositAccountManager.uri()),
-        ApplicationBuilder.create(ServiceRunner.tellerManager.name(), ServiceRunner.tellerManager.uri()),
-        ApplicationBuilder.create(ServiceRunner.reportManager.name(), ServiceRunner.reportManager.uri()),
-        ApplicationBuilder.create(ServiceRunner.chequeManager.name(), ServiceRunner.chequeManager.uri()),
-        ApplicationBuilder.create(ServiceRunner.payrollManager.name(), ServiceRunner.payrollManager.uri()),
-        ApplicationBuilder.create(ServiceRunner.groupManager.name(), ServiceRunner.groupManager.uri())
-        //ApplicationBuilder.create(ServiceRunner.datamigrationManager.name(), ServiceRunner.datamigrationManager.uri())
+            ApplicationBuilder.create(ServiceRunner.identityManager.name(), ServiceRunner.identityManager.uri()),
+            ApplicationBuilder.create(ServiceRunner.rhythmManager.name(), ServiceRunner.rhythmManager.uri()),
+            ApplicationBuilder.create(ServiceRunner.organizationManager.name(), ServiceRunner.organizationManager.uri()),
+            ApplicationBuilder.create(ServiceRunner.customerManager.name(), ServiceRunner.customerManager.uri()),
+            ApplicationBuilder.create(ServiceRunner.ledgerManager.name(), ServiceRunner.ledgerManager.uri()),
+            ApplicationBuilder.create(ServiceRunner.portfolioManager.name(), ServiceRunner.portfolioManager.uri()),
+            ApplicationBuilder.create(ServiceRunner.depositAccountManager.name(), ServiceRunner.depositAccountManager.uri()),
+            ApplicationBuilder.create(ServiceRunner.tellerManager.name(), ServiceRunner.tellerManager.uri()),
+            ApplicationBuilder.create(ServiceRunner.reportManager.name(), ServiceRunner.reportManager.uri()),
+            ApplicationBuilder.create(ServiceRunner.chequeManager.name(), ServiceRunner.chequeManager.uri()),
+            ApplicationBuilder.create(ServiceRunner.payrollManager.name(), ServiceRunner.payrollManager.uri()),
+            ApplicationBuilder.create(ServiceRunner.groupManager.name(), ServiceRunner.groupManager.uri())
+            //ApplicationBuilder.create(ServiceRunner.datamigrationManager.name(), ServiceRunner.datamigrationManager.uri())
     );
 
 
@@ -470,7 +468,7 @@ public class ServiceRunner {
 
       provisionApp(tenant, ServiceRunner.groupManager, org.apache.fineract.cn.group.api.v1.EventConstants.INITIALIZE);
 
-    //  provisionApp(tenant, ServiceRunner.datamigrationManager, DatamigrationEventConstants.INITIALIZE);
+       provisionApp(tenant, ServiceRunner.datamigrationManager, DatamigrationEventConstants.INITIALIZE);
 
       final UserWithPassword orgAdminUserPassword = createOrgAdminRoleAndUser(tenantAdminPassword.getAdminPassword());
 
@@ -612,7 +610,7 @@ public class ServiceRunner {
     ledgerManagementPermission.setAllowedOperations(AllowedOperation.ALL);
     ledgerManagementPermission.setPermittableEndpointGroupIdentifier(org.apache.fineract.cn.accounting.api.v1.PermittableGroupIds.THOTH_LEDGER);
 
-       final Permission accountManagementPermission = new Permission();
+    final Permission accountManagementPermission = new Permission();
     accountManagementPermission.setAllowedOperations(AllowedOperation.ALL);
     accountManagementPermission.setPermittableEndpointGroupIdentifier(org.apache.fineract.cn.accounting.api.v1.PermittableGroupIds.THOTH_ACCOUNT);
 
@@ -620,15 +618,15 @@ public class ServiceRunner {
     final Role role = new Role();
     role.setIdentifier("orgadmin");
     role.setPermissions(
-        Arrays.asList(
-                employeeAllPermission,
-                officeAllPermission,
-                userAllPermission,
-                roleAllPermission,
-                selfManagementPermission,
-                ledgerManagementPermission,
-                accountManagementPermission
-        )
+            Arrays.asList(
+                    employeeAllPermission,
+                    officeAllPermission,
+                    userAllPermission,
+                    roleAllPermission,
+                    selfManagementPermission,
+                    ledgerManagementPermission,
+                    accountManagementPermission
+            )
     );
 
     return role;
@@ -638,8 +636,7 @@ public class ServiceRunner {
     final Authentication passwordOnlyAuthentication
             = identityManager.api().login(userWithPassword.getIdentifier(), userWithPassword.getPassword());
     try (final AutoUserContext ignored
-                 = new AutoUserContext(userWithPassword.getIdentifier(), passwordOnlyAuthentication.getAccessToken()))
-    {
+                 = new AutoUserContext(userWithPassword.getIdentifier(), passwordOnlyAuthentication.getAccessToken())) {
       identityManager.api().changeUserPassword(
               userWithPassword.getIdentifier(), new Password(userWithPassword.getPassword()));
       Assert.assertTrue(eventRecorder.wait(EventConstants.OPERATION_PUT_USER_PASSWORD,
