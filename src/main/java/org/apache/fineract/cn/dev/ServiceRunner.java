@@ -116,7 +116,7 @@ public class ServiceRunner {
   //private static Microservice<ChequeManager> chequeManager;
   //private static Microservice<PayrollManager> payrollManager;
   private static Microservice<GroupManager> groupManager;
-  private static Microservice<DatamigrationManager> datamigrationManager;
+  //private static Microservice<DatamigrationManager> datamigrationManager;
 
 
   private static DB embeddedMariaDb;
@@ -248,8 +248,8 @@ public class ServiceRunner {
     ServiceRunner.groupManager = new Microservice<>(GroupManager.class, "group", "0.1.0-BUILD-SNAPSHOT", ServiceRunner.INTEGRATION_TEST_ENVIRONMENT);
     startService(generalProperties, ServiceRunner.groupManager);
 
-    ServiceRunner.datamigrationManager = new Microservice<>(DatamigrationManager.class, "datamigration", "0.1.0-BUILD-SNAPSHOT", ServiceRunner.INTEGRATION_TEST_ENVIRONMENT);
-    startService(generalProperties, datamigrationManager);
+    /*ServiceRunner.datamigrationManager = new Microservice<>(DatamigrationManager.class, "datamigration", "0.1.0-BUILD-SNAPSHOT", ServiceRunner.INTEGRATION_TEST_ENVIRONMENT);
+    startService(generalProperties, datamigrationManager);*/
   }
 
   @After
@@ -266,7 +266,7 @@ public class ServiceRunner {
     ServiceRunner.customerManager.kill();
     ServiceRunner.organizationManager.kill();
     ServiceRunner.identityManager.kill();
-    ServiceRunner.datamigrationManager.kill();
+    //ServiceRunner.datamigrationManager.kill();
 
     if (!isPersistent) {
       ServiceRunner.embeddedMariaDb.stop();
@@ -468,7 +468,7 @@ public class ServiceRunner {
 
       provisionApp(tenant, ServiceRunner.groupManager, org.apache.fineract.cn.group.api.v1.EventConstants.INITIALIZE);
 
-       provisionApp(tenant, ServiceRunner.datamigrationManager, DatamigrationEventConstants.INITIALIZE);
+      // provisionApp(tenant, ServiceRunner.datamigrationManager, DatamigrationEventConstants.INITIALIZE);
 
       final UserWithPassword orgAdminUserPassword = createOrgAdminRoleAndUser(tenantAdminPassword.getAdminPassword());
 
